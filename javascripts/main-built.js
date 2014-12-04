@@ -9309,7 +9309,12 @@ var b=1;Pusher.auth_callbacks={};Pusher.authorizers={ajax:function(b,a){var d;d=
 c=!0}catch(g){a(!0,"JSON returned from webapp was invalid, yet status code was 200. Data was: "+d.responseText)}c&&a(!1,b)}else Pusher.warn("Couldn't get auth info from your webapp",d.status),a(!0,d.status)};d.send(this.composeQuery(b));return d},jsonp:function(c,a){void 0!==this.authOptions.headers&&Pusher.warn("Warn","To send headers with the auth request, you must use AJAX, rather than JSONP.");var d=b.toString();b++;var h=Pusher.Util.getDocument(),f=h.createElement("script");Pusher.auth_callbacks[d]=
 function(b){a(!1,b)};f.src=this.options.authEndpoint+"?callback="+encodeURIComponent("Pusher.auth_callbacks['"+d+"']")+"&"+this.composeQuery(c);d=h.getElementsByTagName("head")[0]||h.documentElement;d.insertBefore(f,d.firstChild)}}}).call(this);
 
-define("pusher", function(){});
+define("pusher", (function (global) {
+    return function () {
+        var ret, fn;
+        return ret || global.Pusher;
+    };
+}(this)));
 
 //     Underscore.js 1.7.0
 //     http://underscorejs.org
@@ -15640,9 +15645,21 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   return game_screen;
 });
 
-define('app',["jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen"], function($, pusher, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen) {
+define('app',["jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen"], function($, o, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen) {
+  var channel, pusher;
   game.main_menu = main_menu;
-  return game.game_screen = game_screen;
+  game.game_screen = game_screen;
+  debugger;
+  Pusher.log = function(message) {
+    if (window.console && window.console.log) {
+      return window.console.log(message);
+    }
+  };
+  pusher = new Pusher("1d4635759ded7a473634");
+  channel = pusher.subscribe("test_channel");
+  return channel.bind("my_event", function(data) {
+    return alert(data.message);
+  });
 });
 
 require(["app"], function() {
