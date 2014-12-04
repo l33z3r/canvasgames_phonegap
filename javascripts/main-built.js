@@ -15645,11 +15645,10 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   return game_screen;
 });
 
-define('app',["jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen"], function($, o, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen) {
+define('app',["require", "jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen"], function(require, $, Pusher, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen) {
   var channel, pusher;
   game.main_menu = main_menu;
   game.game_screen = game_screen;
-  debugger;
   Pusher.log = function(message) {
     if (window.console && window.console.log) {
       return window.console.log(message);
@@ -15657,9 +15656,17 @@ define('app',["jquery", "pusher", "backbone", "message", "Point", "Player", "can
   };
   pusher = new Pusher("1d4635759ded7a473634");
   channel = pusher.subscribe("test_channel");
-  return channel.bind("my_event", function(data) {
+  channel.bind("my_event", function(data) {
     return alert(data.message);
   });
+  return window.setTimeout((function(_this) {
+    return function() {
+      alert("requiring motion");
+      return require(["motion"], function(motion) {
+        return alert("Motion: " + motion);
+      });
+    };
+  })(this), 5000);
 });
 
 require(["app"], function() {
