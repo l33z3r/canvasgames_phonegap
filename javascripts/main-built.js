@@ -15645,7 +15645,21 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   return game_screen;
 });
 
-define('app',["require", "jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen"], function(require, $, Pusher, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen) {
+define('motion',[],function() {
+  var onError, onSuccess, options, watchID;
+  onSuccess = function(acceleration) {
+    return alert("Acceleration X: " + acceleration.x + "\n" + "Acceleration Y: " + acceleration.y + "\n" + "Acceleration Z: " + acceleration.z + "\n" + "Timestamp: " + acceleration.timestamp + "\n");
+  };
+  onError = function() {
+    return alert("onError!");
+  };
+  options = {
+    frequency: 3000
+  };
+  return watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+});
+
+define('app',["require", "jquery", "pusher", "backbone", "message", "Point", "Player", "canvasquery", "playground", "game", "main_menu", "game_screen", "motion"], function(require, $, Pusher, Backbone, message, Point, Player, cq, playground, game, main_menu, game_screen, motion) {
   var channel, pusher;
   game.main_menu = main_menu;
   game.game_screen = game_screen;
@@ -15661,10 +15675,7 @@ define('app',["require", "jquery", "pusher", "backbone", "message", "Point", "Pl
   });
   return window.setTimeout((function(_this) {
     return function() {
-      alert("requiring motion");
-      return require(["motion"], function(motion) {
-        return alert("Motion: " + motion);
-      });
+      return motion.startWatching();
     };
   })(this), 5000);
 });
