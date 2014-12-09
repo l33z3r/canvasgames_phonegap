@@ -15597,8 +15597,6 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
       currentPlayer = Gamevars.currentPlayer;
       maxPlayerAccel = Settings.maxPlayerAccel;
       maxPlayerSpeed = Settings.maxPlayerSpeed;
-      Gamevars.currentReadAccelerationX = window.x || 0;
-      Gamevars.currentReadAccelerationY = window.y || 0;
       Gamevars.accelerometerX = (Gamevars.currentReadAccelerationX * Settings.accelFilteringFactor) + Gamevars.accelerometerX * (1.0 - Settings.accelFilteringFactor);
       Gamevars.accelerometerY = (Gamevars.currentReadAccelerationY * Settings.accelFilteringFactor) + Gamevars.accelerometerY * (1.0 - Settings.accelFilteringFactor);
       Gamevars.accelerometerZ = (Gamevars.currentReadAccelerationZ * Settings.accelFilteringFactor) + Gamevars.accelerometerZ * (1.0 - Settings.accelFilteringFactor);
