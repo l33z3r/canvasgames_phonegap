@@ -15601,14 +15601,14 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
       Gamevars.accelerometerY = (Gamevars.currentReadAccelerationY * Settings.accelFilteringFactor) + Gamevars.accelerometerY * (1.0 - Settings.accelFilteringFactor);
       Gamevars.accelerometerZ = (Gamevars.currentReadAccelerationZ * Settings.accelFilteringFactor) + Gamevars.accelerometerZ * (1.0 - Settings.accelFilteringFactor);
       if (Gamevars.accelerometerY > 0.05) {
-        currentPlayer.accelX = -maxPlayerAccel;
+        currentPlayer.accelY = maxPlayerAccel;
       } else if (Gamevars.accelerometerY < -0.05) {
-        currentPlayer.accelX = maxPlayerAccel;
+        currentPlayer.accelY = -maxPlayerAccel;
       }
       if (Gamevars.accelerometerX < -0.05) {
-        currentPlayer.accelY = -maxPlayerAccel;
+        currentPlayer.accelX = maxPlayerAccel;
       } else if (Gamevars.accelerometerX > 0.05) {
-        currentPlayer.accelY = maxPlayerAccel;
+        currentPlayer.accelX = -maxPlayerAccel;
       }
       currentPlayer.speedX += currentPlayer.accelX * delta;
       currentPlayer.speedY += currentPlayer.accelY * delta;
