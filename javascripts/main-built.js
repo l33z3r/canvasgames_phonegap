@@ -15514,8 +15514,8 @@ define('Settings',[],function() {
     playerWidth: 100,
     playerHeight: 100,
     appBGColor: "#7EC0EE",
-    maxPlayerAccel: 400.0,
-    maxPlayerSpeed: 200.0,
+    maxPlayerAccel: 500.0,
+    maxPlayerSpeed: 300.0,
     accelFilteringFactor: 0.75
   };
   return Settings;
@@ -15569,7 +15569,7 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   game_screen = {
     enter: function() {
       var i, numPlayers;
-      numPlayers = 1;
+      numPlayers = 4;
       i = 1;
       while (i <= numPlayers) {
         Gamevars.players.push(new Player("Player " + (i + 1), new Point(i * 100, 100), "#FF0000"));
@@ -15580,7 +15580,7 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
     },
     ready: function() {},
     step: function(delta) {
-      var currentPlayer, maxPlayerAccel, maxPlayerSpeed, newX, newY;
+      var currentPlayer, maxPlayerAccel, maxPlayerSpeed, newX, newY, usingLandscape;
       if (game.keyboard.keys["left"]) {
         Gamevars.currentPlayer.goLeft();
       }
@@ -15600,15 +15600,29 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
       Gamevars.accelerometerX = (Gamevars.currentReadAccelerationX * Settings.accelFilteringFactor) + Gamevars.accelerometerX * (1.0 - Settings.accelFilteringFactor);
       Gamevars.accelerometerY = (Gamevars.currentReadAccelerationY * Settings.accelFilteringFactor) + Gamevars.accelerometerY * (1.0 - Settings.accelFilteringFactor);
       Gamevars.accelerometerZ = (Gamevars.currentReadAccelerationZ * Settings.accelFilteringFactor) + Gamevars.accelerometerZ * (1.0 - Settings.accelFilteringFactor);
-      if (Gamevars.accelerometerY > 0.05) {
-        currentPlayer.accelY = maxPlayerAccel;
-      } else if (Gamevars.accelerometerY < -0.05) {
-        currentPlayer.accelY = -maxPlayerAccel;
-      }
-      if (Gamevars.accelerometerX < -0.05) {
-        currentPlayer.accelX = maxPlayerAccel;
-      } else if (Gamevars.accelerometerX > 0.05) {
-        currentPlayer.accelX = -maxPlayerAccel;
+      usingLandscape = true;
+      if (usingLandscape) {
+        if (Gamevars.accelerometerY > 0.05) {
+          currentPlayer.accelY = maxPlayerAccel;
+        } else if (Gamevars.accelerometerY < -0.05) {
+          currentPlayer.accelY = -maxPlayerAccel;
+        }
+        if (Gamevars.accelerometerX < -0.05) {
+          currentPlayer.accelX = maxPlayerAccel;
+        } else if (Gamevars.accelerometerX > 0.05) {
+          currentPlayer.accelX = -maxPlayerAccel;
+        }
+      } else {
+        if (Gamevars.accelerometerY > 0.05) {
+          currentPlayer.accelX = -maxPlayerAccel;
+        } else if (Gamevars.accelerometerY < -0.05) {
+          currentPlayer.accelX = maxPlayerAccel;
+        }
+        if (Gamevars.accelerometerX < -0.05) {
+          currentPlayer.accelY = -maxPlayerAccel;
+        } else if (Gamevars.accelerometerX > 0.05) {
+          currentPlayer.accelY = maxPlayerAccel;
+        }
       }
       currentPlayer.speedX += currentPlayer.accelX * delta;
       currentPlayer.speedY += currentPlayer.accelY * delta;

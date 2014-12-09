@@ -16,6 +16,8 @@
     Lee Farrell
   </author>
 
+  <preference name="orientation" value="landscape" />
+
   <!-- use 3.4.0 as it works with facebook connect -->
   <preference name="phonegap-version" value="3.4.0" />
 
