@@ -16,7 +16,7 @@
     Lee Farrell
   </author>
 
-  <!-- use 3.4.0 as it works with facebook conenct -->
+  <!-- use 3.4.0 as it works with facebook connect -->
   <preference name="phonegap-version" value="3.4.0" />
 
   <!--feature name="org.apache.cordova.facebook.Connect">

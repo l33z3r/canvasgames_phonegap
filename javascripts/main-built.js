@@ -15470,7 +15470,11 @@ define('Player',["Point", "game"], function(Point, game) {
     this.colour = colour;
     this.lastTick = 0;
     this.duration = 1;
-    return this.orientation = "right";
+    this.orientation = "right";
+    this.accelX = 0;
+    this.accelY = 0;
+    this.speedX = 0;
+    return this.speedY = 0;
   };
   Player.prototype.getNextSprite = function() {
     var delta, frame, offset, sprite;
@@ -15509,7 +15513,10 @@ define('Settings',[],function() {
   Settings = {
     playerWidth: 100,
     playerHeight: 100,
-    appBGColor: "#7EC0EE"
+    appBGColor: "#7EC0EE",
+    maxPlayerAccel: 400.0,
+    maxPlayerSpeed: 200.0,
+    accelFilteringFactor: 0.75
   };
   return Settings;
 });
@@ -15543,7 +15550,16 @@ define('Gamevars',[],function() {
     currentPlayer: null,
     touchStartPos: null,
     touchEndPos: null,
-    isTouching: false
+    isTouching: false,
+    accelerometerX: 0,
+    accelerometerY: 0,
+    accelerometerZ: 0,
+    accelerationX: 0,
+    accelerationY: 0,
+    accelerationZ: 0,
+    currentReadAccelerationX: 0,
+    currentReadAccelerationY: 0,
+    currentReadAccelerationZ: 0
   };
   return Gamevars;
 });
@@ -15553,17 +15569,18 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   game_screen = {
     enter: function() {
       var i, numPlayers;
-      i = 0;
-      numPlayers = 10;
-      while (i < numPlayers - 1) {
+      numPlayers = 1;
+      i = 1;
+      while (i <= numPlayers) {
         Gamevars.players.push(new Player("Player " + (i + 1), new Point(i * 100, 100), "#FF0000"));
         i++;
       }
+      debugger;
       return Gamevars.currentPlayer = Gamevars.players[0];
     },
     ready: function() {},
     step: function(delta) {
-      var playerX, playerY, touchX, touchY;
+      var currentPlayer, maxPlayerAccel, maxPlayerSpeed, newX, newY;
       if (game.keyboard.keys["left"]) {
         Gamevars.currentPlayer.goLeft();
       }
@@ -15576,22 +15593,35 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
       if (game.keyboard.keys["down"]) {
         Gamevars.currentPlayer.goDown();
       }
-      if (Gamevars.isTouching) {
-        playerX = Gamevars.currentPlayer.currentPosition.x;
-        playerY = Gamevars.currentPlayer.currentPosition.y;
-        touchX = Gamevars.touchStartPos.x;
-        touchY = Gamevars.touchStartPos.y;
-        if (playerX > touchX + 10) {
-          Gamevars.currentPlayer.goLeft();
-        } else if (playerX < touchX - 10) {
-          Gamevars.currentPlayer.goRight();
-        }
-        if (playerY > touchY + 10) {
-          return Gamevars.currentPlayer.goUp();
-        } else if (playerY < touchY - 10) {
-          return Gamevars.currentPlayer.goDown();
-        }
+      debugger;
+      currentPlayer = Gamevars.currentPlayer;
+      maxPlayerAccel = Settings.maxPlayerAccel;
+      maxPlayerSpeed = Settings.maxPlayerSpeed;
+      Gamevars.currentReadAccelerationX = window.x || 0;
+      Gamevars.currentReadAccelerationY = window.y || 0;
+      Gamevars.accelerometerX = (Gamevars.currentReadAccelerationX * Settings.accelFilteringFactor) + Gamevars.accelerometerX * (1.0 - Settings.accelFilteringFactor);
+      Gamevars.accelerometerY = (Gamevars.currentReadAccelerationY * Settings.accelFilteringFactor) + Gamevars.accelerometerY * (1.0 - Settings.accelFilteringFactor);
+      Gamevars.accelerometerZ = (Gamevars.currentReadAccelerationZ * Settings.accelFilteringFactor) + Gamevars.accelerometerZ * (1.0 - Settings.accelFilteringFactor);
+      if (Gamevars.accelerometerY > 0.05) {
+        currentPlayer.accelX = -maxPlayerAccel;
+      } else if (Gamevars.accelerometerY < -0.05) {
+        currentPlayer.accelX = maxPlayerAccel;
       }
+      if (Gamevars.accelerometerX < -0.05) {
+        currentPlayer.accelY = -maxPlayerAccel;
+      } else if (Gamevars.accelerometerX > 0.05) {
+        currentPlayer.accelY = maxPlayerAccel;
+      }
+      currentPlayer.speedX += currentPlayer.accelX * delta;
+      currentPlayer.speedY += currentPlayer.accelY * delta;
+      currentPlayer.speedX = Math.max(Math.min(currentPlayer.speedX, Settings.maxPlayerSpeed), -Settings.maxPlayerSpeed);
+      currentPlayer.speedY = Math.max(Math.min(currentPlayer.speedY, Settings.maxPlayerSpeed), -Settings.maxPlayerSpeed);
+      newX = currentPlayer.currentPosition.x + (currentPlayer.speedX * delta);
+      newY = currentPlayer.currentPosition.y + (currentPlayer.speedY * delta);
+      newX = Math.min($(window).width(), Math.max(newX, 0));
+      newY = Math.min($(window).height(), Math.max(newY, 0));
+      currentPlayer.currentPosition.x = newX;
+      return currentPlayer.currentPosition.y = newY;
     },
     render: function(delta) {
       var i, player, x, y, _results;
@@ -15645,24 +15675,38 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
   return game_screen;
 });
 
-define('Motion',[],function() {
+define('Motion',["Gamevars"], function(Gamevars) {
   var Motion;
   Motion = function() {
     return this.watchID = null;
   };
   Motion.prototype.startWatching = function() {
-    var onError, onSuccess, options;
+    var handleMotionEvent, onError, onSuccess, options;
     alert("start watch");
-    onSuccess = function(acceleration) {
-      return alert("Acceleration X: " + acceleration.x + "\n" + "Acceleration Y: " + acceleration.y + "\n" + "Acceleration Z: " + acceleration.z + "\n" + "Timestamp: " + acceleration.timestamp + "\n");
-    };
-    onError = function() {
-      return alert("onError!");
-    };
-    options = {
-      frequency: 3000
-    };
-    this.watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    if (navigator.accelerometer != null) {
+      onSuccess = function(acceleration) {
+        Gamevars.currentReadAccelerationX = acceleration.x;
+        Gamevars.currentReadAccelerationY = acceleration.y;
+        return Gamevars.currentReadAccelerationZ = acceleration.z;
+      };
+      onError = function() {
+        return alert("onError!");
+      };
+      options = {
+        frequency: 300
+      };
+      this.watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    } else {
+      handleMotionEvent = function(event) {
+        debugger;
+        var x, y;
+        x = event.acceleration.x;
+        y = event.acceleration.y;
+        return console.log("new x y: " + x + " " + y);
+      };
+      debugger;
+      window.addEventListener("devicemotion", handleMotionEvent, false);
+    }
     return alert("here");
   };
   return Motion;
