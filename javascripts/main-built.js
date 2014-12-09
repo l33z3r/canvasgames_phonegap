@@ -15603,9 +15603,9 @@ define('game_screen',["Player", "Point", "game", "Settings", "Gamevars"], functi
       usingLandscape = true;
       if (usingLandscape) {
         if (Gamevars.accelerometerY > 0.05) {
-          currentPlayer.accelX = -maxPlayerAccel;
-        } else if (Gamevars.accelerometerY < -0.05) {
           currentPlayer.accelX = maxPlayerAccel;
+        } else if (Gamevars.accelerometerY < -0.05) {
+          currentPlayer.accelX = -maxPlayerAccel;
         }
         if (Gamevars.accelerometerX < -0.05) {
           currentPlayer.accelY = -maxPlayerAccel;
